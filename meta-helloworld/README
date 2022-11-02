@@ -1,41 +1,151 @@
-This README file contains information on the contents of the meta-helloworld layer.
+ --------------------------------------------------------
+| How to create a new layer easily, i.e meta-helloworld  |
+ --------------------------------------------------------
 
-Please see the corresponding sections below for details.
+1° source poky/oe-init-build-env and folder build will be created
 
-Dependencies
-============
+2° bitbake-layers create ../meta-helloworld
 
-  URI: <first dependency>
-  branch: <branch name>
+3° bitbake-layers add-layer ../meta-helloworld and file build/conf/bblayer.conf 
+   will be update with meta-helloworld path
 
-  URI: <second dependency>
-  branch: <branch name>
+4° mkdir -p meta-helloworld/recipes-kernel/helloworld/files
 
-  .
-  .
-  .
+5° cd meta-helloworld/recipes-kernel/helloworld
 
-Patches
-=======
+6° edit file helloworld_1.0.bb 
 
-Please submit any patches against the meta-helloworld layer to the xxxx mailing list (xxxx@zzzz.org)
-and cc: the maintainer:
+        SUMMARY = "Example of how to build an external Linux kernel module"
 
-Maintainer: XXX YYYYYY <xxx.yyyyyy@zzzzz.com>
+        LICENSE = "GPLv2"
 
-Table of Contents
-=================
+        LIC_FILES_CHKSUM = "file://COPYING;md5=12f884d2ae1ff87c09e5b7ccc2c4ca7e"
 
-  I. Adding the meta-helloworld layer to your build
- II. Misc
+        #In the recipe, you just need to define the location of the kernel module 
+
+        #source code, and inherit module.bbclass to build the kernel module
+
+        inherit module
+
+        #copy files to workdir to build it
+
+        SRC_URI =   "file://hello_world.c \
+
+                    file://Makefile \
+
+                    file://COPYING \
+
+                    "
+
+        S = "${WORKDIR}"
+
+         
+
+        RPROVIDES_${PN} += "hello_world"
+
+7° cd meta-helloworld/recipes-kernel/helloworld/files
+
+8° Edit file Makefile
+
+        obj-m += hello_world.o
+
+        SRC := $(shell pwd)
+
+        all:
+
+            $(MAKE) -C $(KERNEL_SRC) M=$(SRC) modules
+
+        modules_install:
+
+            $(MAKE) -C $(KERNEL_SRC) M=$(SRC) modules_install
+
+8° edit file hello_world.c
+
+ #include<linux/kernel.h>
+
+#include<linux/init.h>
+
+#include<linux/module.h>
+
+ 
+
+/*
+
+** Module Init function
+
+*/
+
+static int __init hello_world_init(void)
+
+{
+
+    pr_info("Welcome to EmbeTronicX\n");
+
+    pr_info("This is the Simple Module\n");
+
+    pr_info("Kernel Module Inserted Successfully...\n");
+
+    return 0;
+
+}
+
+/*
+
+** Module Exit function
+
+*/
+
+static void __exit hello_world_exit(void)
+
+{
+
+    pr_info("Kernel Module Removed Successfully...\n");
+
+}
+
+ 
+
+module_init(hello_world_init);
+
+module_exit(hello_world_exit);
+
+ 
+
+MODULE_LICENSE("GPL");
+
+MODULE_AUTHOR("S.MINKO");
+
+MODULE_DESCRIPTION("A simple hello world driver");
+
+MODULE_VERSION("2:1.0");
+
+9°  from meta-helloworld folder type tree -L 4
 
 
-I. Adding the meta-helloworld layer to your build
-=================================================
+tree -L 4
 
-Run 'bitbake-layers add-layer meta-helloworld'
+├── conf
 
-II. Misc
-========
+│   └── layer.conf
 
---- replace with specific information about the meta-helloworld layer ---
+├── COPYING.MIT
+
+├── README
+
+└── recipes-kernel
+
+    └── helloworld
+
+        ├── files
+
+        │   ├── COPYING
+
+        │   ├── hello_world.c
+
+        │   ├── Makefile
+
+        │   └── ReadMe.md
+
+        └── helloworld_1.0.bb
+
+10° run bitbake core-image-minimal
