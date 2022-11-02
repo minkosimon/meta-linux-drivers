@@ -7,12 +7,12 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=12f884d2ae1ff87c09e5b7ccc2c4ca7e"
 inherit module
 
 #copy files to workdir to build it
-SRC_URI =   "file://hello_world.c \
+SRC_URI =   "file://hello_world_param.c \
             file://Makefile \
             file://COPYING \
             "
 
 S = "${WORKDIR}"
  
-RPROVIDES_${PN} += "kernel-module-hello_world" 
+RPROVIDES_${PN} += "kernel-module-hello_world_param" 
 #FILES_${PN} += "${base_libdir}/modules/"
